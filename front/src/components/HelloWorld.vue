@@ -3,10 +3,10 @@
 
   <p>
     <a href="https://vitejs.dev/guide/features.html" target="_blank">
-      Vite Documentation
+      Vite Doc
     </a>
     |
-    <a href="https://v3.vuejs.org/" target="_blank">Vue 3 Documentation</a>
+    <a href="https://v3.vuejs.org/" target="_blank">Vue 3 Doc</a>
   </p>
 
   <button @click="state.count++">count is: {{ state.count }}</button>
@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import { defineProps, reactive, onMounted } from 'vue'
+import {defineProps, onMounted, reactive} from 'vue'
 
 defineProps({
   msg: String
@@ -28,10 +28,8 @@ const state = reactive({ count: 0 })
 const data = reactive({ text1: "" })
 
 onMounted(async () => {
-  const rsp1 = await fetch(`http://127.0.0.1:8010/hello`).then(rsp => rsp.text())
-  data.text1 = rsp1
-  const rsp2 = await fetch(`http://127.0.0.1:8010/hello`, {method: 'POST'}).then(rsp => rsp.text())
-  data.text2 = rsp2
+    data.text1 = await fetch(`http://127.0.0.1:8010/hello`).then(rsp => rsp.text())
+    data.text2 = await fetch(`http://127.0.0.1:8010/hello`, {method: 'POST'}).then(rsp => rsp.text())
 })
 </script>
 
