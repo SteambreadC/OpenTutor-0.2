@@ -1,16 +1,16 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
+  <div class="container mt-5">
+    <h1 class="mb-4">{{ msg = 'Input' }}</h1>
     <form @submit.prevent="submitForm">
-      <div>
-        <label for="material">Material (PDF):</label>
-        <input type="file" id="material" name="material" accept="application/pdf" @change="handleFileUpload">
+      <div class="mb-3">
+        <label for="material" class="form-label">Material (PDF):</label>
+        <input type="file" class="form-control" id="material" name="material" accept="application/pdf" @change="handleFileUpload">
       </div>
-      <div>
-        <label for="text">Your Text:</label>
-        <textarea id="text" name="text" v-model="userText"></textarea>
+      <div class="mb-3">
+        <label for="text" class="form-label">Your Text:</label>
+        <textarea class="form-control" id="text" name="text" rows="3" v-model="userText"></textarea>
       </div>
-      <button type="submit">Submit</button>
+      <button type="submit" class="btn btn-primary">Submit</button>
     </form>
   </div>
 </template>
@@ -18,7 +18,7 @@
 <script>
 import axios from 'axios';
 export default {
-  name: 'HelloWorld',
+  name: 'TAtest1',
   props: {
     msg: String,
   },
@@ -63,7 +63,27 @@ export default {
 </script>
 
 <style scoped>
-form > div {
-  margin-bottom: 20px;
+
+/* 限制输入框和文件选择框长度 */
+input[type="file"],
+textarea {
+  max-width: 700px; /* 或其他适当的长度 */
+  margin: 0 auto;
+  display: block;
+}
+
+h1{
+    font-weight: 600;
+}
+.form-label {
+  font-family: 'Montserrat', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600; /* 例如，使用正常字重 */
+  color: wheat; /* 对于特定元素使用不同的字体颜色 */
+  font-size: 120%;
+  font-style: normal;
+}
+.btn-primary{
+    margin-bottom: 50px;
 }
 </style>

@@ -1,19 +1,19 @@
 <template>
-  <h1>{{ msg }}</h1>
+  <div class="content">
+    <h1>{{ msg = "Home page ~" }}</h1>
 
-  <p>
-    <a href="https://vitejs.dev/guide/features.html" target="_blank">
-      Vite Doc
-    </a>
-    |
-    <a href="https://v3.vuejs.org/" target="_blank">Vue 3 Doc</a>
-  </p>
+    <p>
+      <a href="https://vitejs.dev/guide/features.html" target="_blank" class="btn-link">Vite Doc</a>
+      |
+      <a href="https://v3.vuejs.org/" target="_blank" class="btn-link">Vue 3 Doc</a>
+    </p>
 
-  <button @click="state.count++">count is: {{ state.count }}</button>
-  <p>{{ data.text1 }}</p>
-  <p>{{ data.text2 }}</p>
-  <p> Edit <code>components/HelloWorld.vue</code> to test hot module replacement.
-  </p>
+    <button @click="state.count++" class="btn custom-count-btn">count is: {{ state.count }}</button>
+    <p>{{ data.text1 }}</p>
+    <p>{{ data.text2 }}</p>
+  </div>
+  <!-- <p> Edit <code>components/HelloWorld.vue</code> to test hot module replacement.</p> -->
+
 </template>
 
 <script setup>
@@ -34,7 +34,21 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-a {
-  color: #42b983;
+h1{
+    margin-top: 3rem;
 }
+a, p {
+  font-size: 120%;
+  color: wheat;
+  margin: 1rem; /* 调整段落的底部外边距以控制行间距 */
+}
+
+.custom-count-btn {
+  margin-bottom: 10px; /* 间距 */
+  background-color: powderblue; /* 按钮背景色 */
+  color: darkblue; /* 按钮文字色 */
+}
+
+
+
 </style>
