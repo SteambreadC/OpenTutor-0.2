@@ -8,8 +8,10 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
+    "lottie-web": "^5.12.2",
     "mdb-vue-ui-kit": "^4.1.1",
-    "vue": "^3.0.5"
+    "vue": "^3.0.5",
+    "vue-axios": "^3.5.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^1.2.2",

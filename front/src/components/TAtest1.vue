@@ -4,7 +4,8 @@
     <form @submit.prevent="submitForm">
       <div class="mb-3">
         <label for="material" class="form-label">Material (PDF):</label>
-        <input type="file" class="form-control" id="material" name="material" accept="application/pdf" @change="handleFileUpload">
+           <input type="file" class="form-control" id="material" name="material" @change="handleFileUpload">
+        <!-- <input type="file" class="form-control" id="material" name="material" accept="application/pdf" @change="handleFileUpload"> -->
       </div>
       <div class="mb-3">
         <label for="text" class="form-label">Your Text:</label>
@@ -41,6 +42,7 @@ export default {
       const formData = new FormData();
       formData.append('material', this.materialFile);
       formData.append('text', this.userText);
+      console.log("Submitting form with data:", formData);
 
       try {
         /*
@@ -52,6 +54,7 @@ export default {
         */
         const response = await axios.post('http://localhost:8010/api/submit', formData)
         alert(`Response: ${response.data.message}`);
+
         // Handle PDF file download if response contains a file
       } catch (error) {
         console.error('Error submitting form:', error);

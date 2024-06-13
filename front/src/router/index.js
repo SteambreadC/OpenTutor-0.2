@@ -1,11 +1,42 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HelloWorld from '../components/HelloWorld.vue';
 import TAtest1 from '../components/TAtest1.vue';
-import Leftsidebar from "../components/leftsidebar.vue";
+import Welcome from '../components/Welcome.vue';
+import CreateCourse from '../components/CreateCourse.vue';
+import UploadMaterial from '../components/UploadMaterial.vue';
+import Waiting from '../components/Waiting.vue';
+import Results from '../components/Results.vue';
 
 const routes = [
   {
     path: '/',
+    name: 'Welcome',
+    components: {
+      default: Welcome
+    }
+  },
+      {
+    path: '/create-course',
+    name: 'CreateCourse',
+    component: CreateCourse
+  },
+  {
+    path: '/upload-material',
+    name: 'UploadMaterial',
+    component: UploadMaterial
+  },
+  {
+    path: '/waiting',
+    name: 'Waiting',
+    component: Waiting
+  },
+  {
+    path: '/results',
+    name: 'Results',
+    component: Results
+  },
+  {
+    path: '/hello',
     name: 'HelloWorld',
     components: {
       default: HelloWorld

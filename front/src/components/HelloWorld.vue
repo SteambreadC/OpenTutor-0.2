@@ -18,6 +18,7 @@
 
 <script setup>
 import {defineProps, onMounted, reactive} from 'vue'
+import axios from 'axios'
 
 defineProps({
   msg: String
@@ -28,8 +29,15 @@ const state = reactive({ count: 0 })
 const data = reactive({ text1: "" })
 
 onMounted(async () => {
-    data.text1 = await fetch(`http://127.0.0.1:8010/hello`).then(rsp => rsp.text())
-    data.text2 = await fetch(`http://127.0.0.1:8010/hello`, {method: 'POST'}).then(rsp => rsp.text())
+  try {
+    const response1 = await axios.get('http://127.0.0.1:8010/hello')
+    data.text1 = response1.data
+
+    const response2 = await axios.post('http://127.0.0.1:8010/hello')
+    data.text2 = response2.data
+  } catch (error) {
+    console.error('Error fetching data:', error)
+  }
 })
 </script>
 
