@@ -7,15 +7,39 @@
 </template>
 
 <script>
-import LottieAnimation from "./LottieAnimation.vue";
 export default {
   name: 'Waiting',
-    components: {LottieAnimation},
+  data() {
+    return {
+      resultReady: false,
+      timer: null,
+    };
+  },
   mounted() {
-    setTimeout(() => {
-      this.$router.push('/results');
-    }, 20000); // 模拟等待时间
-  }
+    this.checkResult();
+  },
+  methods: {
+      checkResult() {
+        this.timer = setInterval(async () => {
+          // 在这里调用后端 API 来检查结果是否准备好
+          // 如果结果准备好了,将 `this.resultReady` 设为 `true`
+          // 例如:
+          // const response = await axios.get('/api/check-result');
+          // this.resultReady = response.data.ready;
+        }, 1000); // 每秒检查一次
+      },
+    },
+  watch: {
+      resultReady(newValue) {
+        if (newValue) {
+          clearInterval(this.timer);
+          this.$router.push('/results');
+        }
+      },
+    },
+    beforeUnmount() {
+      clearInterval(this.timer);
+    },
 };
 </script>
 

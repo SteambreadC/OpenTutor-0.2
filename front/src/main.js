@@ -7,10 +7,25 @@ import VueAxios from 'vue-axios';
 import router from './router';
 
 
-/*import 'mdb-vue-ui-kit/css/mdb.min.css'*/
 
 const app = createApp(App);
 
-app.use(router);
-app.use(VueAxios, axios);
-app.mount('#app');
+axios.defaults.baseURL = 'http://localhost:8010'
+
+
+const token = localStorage.getItem('token');
+if (!token) {
+  axios.get('/generate-token').then(response => {
+    const newToken = response.data.token;
+    localStorage.setItem('token', newToken);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    app.use(router);
+    app.use(VueAxios, axios);
+    app.mount('#app');
+  });
+} else {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  app.use(router);
+  app.use(VueAxios, axios);
+  app.mount('#app');
+}

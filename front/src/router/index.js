@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import HelloWorld from '../components/HelloWorld.vue';
-import TAtest1 from '../components/TAtest1.vue';
+import HelloWorld from '../components/oldFiles/HelloWorld.vue';
+import TAtest1 from '../components/oldFiles/TAtest1.vue';
 import Welcome from '../components/Welcome.vue';
 import CreateCourse from '../components/CreateCourse.vue';
 import UploadMaterial from '../components/UploadMaterial.vue';

@@ -4,7 +4,7 @@
     <form @submit.prevent="submitForm">
       <div class="mb-3">
         <label for="material" class="form-label">课本: </label>
-        <input type="file" class="form-control" id="material" name="material" @change="handleFileUpload('textbook', $event)" />
+        <input type="file" class="form-control" id="course-materials" multiple @change="handleFileUp($event, 'courseMaterials')">
       </div>
       <div class="mb-3">
         <label for="material" class="form-label">PPT: </label>
@@ -36,6 +36,12 @@ import axios from 'axios';
 
 export default {
   name: 'UploadMaterial',
+  props: {
+    courseId: {
+      type: String,
+      required: true
+    }
+  },
   data() {
     return {
       files: {
@@ -54,6 +60,8 @@ export default {
       },
       async submitForm() {
           const formData = new FormData();
+          formData.append('course_id', this.courseId);
+          console.log("Course id =", this.courseId)
           for (let key in this.files) {
               if (this.files[key]) {
                   formData.append(key, this.files[key]);
@@ -77,14 +85,23 @@ export default {
 
 <style scoped>
 .upload-material {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  color: white;
   text-align: center;
-  margin-top: 50px;
 }
 form > div {
   margin-bottom: 20px;
 }
 button {
   margin-top: 20px;
-  padding: 10px 20px;
+  padding: 12px 30px;
+  color: #471081;
+  background: #fcfcfc;
+  font-family: 'Arial', sans-serif; /* 设置字体系列 */
+  font-size: 16px; /* 设置字体大小 */
+  font-weight: bold; /* 设置字体粗细 */
 }
 </style>

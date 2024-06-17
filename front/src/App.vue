@@ -2,7 +2,7 @@
     <div class="app-container">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">I'm your GPT study assistant :D</a>
+      <a class="navbar-brand" href="/">OpenTutor :D</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -12,7 +12,13 @@
             <router-link class="nav-link" to="/">Home</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="/ta-test">TA Test</router-link>
+            <router-link class="nav-link" to="/create-course">Courses</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link class="nav-link" to="/upload-material">Upload</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link class="nav-link" to="/Results">Results</router-link>
           </li>
           <!-- 更多导航项 -->
         </ul>
@@ -26,7 +32,7 @@
     <router-view class="view main-content"></router-view>
     </div>
     <footer class="footer">
-      © 2024 My Website
+      © 2024 By Eddie Cao
     </footer>
     </div>
 </template>
@@ -87,8 +93,9 @@ li:not(:last-of-type) {
 .footer {
   text-align: center;
   padding: 10px 0;
-  background-color: #f8f9fa; /* Light grey background, adjust as needed */
-  border-top: 1px solid #e7e7e7; /* Light grey border, adjust as needed */
+  color: #2829ee; /* 修改字符颜色，例如黑色 */
+  background-color: #ffffff; /* Light grey background, adjust as needed */
+  border-top: 1px solid #a91616; /* Light grey border, adjust as needed */
 }
 
 /* 调整下拉菜单容器的样式 */
@@ -100,5 +107,9 @@ li:not(:last-of-type) {
 .navbar-nav .dropdown-item {
   color: #007bff; /* 修改文字颜色 */
   text-align: center; /* 文字居中 */
+}
+
+.navbar-brand{
+    color: #007bff;
 }
 </style>
