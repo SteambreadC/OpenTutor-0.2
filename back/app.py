@@ -177,7 +177,7 @@ class SubmitAPI(Resource):
 
         # 保存所有文件
         for key, file in files.items():
-            print(key)
+            # print(key)
             if file:
                 filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(filename)

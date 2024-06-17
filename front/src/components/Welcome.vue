@@ -11,7 +11,7 @@ export default {
   name: 'Welcome',
   methods: {
     start() {
-      this.$router.push('/create-course');
+      this.$router.push('/handle');
     }
   }
 };

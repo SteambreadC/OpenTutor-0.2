@@ -1,30 +1,30 @@
 <template>
   <div class="upload-material">
-    <h1 class="mb-4">{{ msg = '上传相关资料' }}</h1>
-    <form @submit.prevent="submitForm">
-      <div class="mb-3">
+    <h1 class="upload-title">上传相关资料</h1>
+    <form @submit.prevent="submitForm" class="upload-form">
+      <div class="form-group">
         <label for="material" class="form-label">课本: </label>
-        <input type="file" class="form-control" id="course-materials" multiple @change="handleFileUp($event, 'courseMaterials')">
+        <input type="file" class="form-control" id="course-materials" multiple @change="handleFileUpload('courseMaterials', $event)">
       </div>
-      <div class="mb-3">
+      <div class="form-group">
         <label for="material" class="form-label">PPT: </label>
-        <input type="file" class="form-control" id="material" name="material" @change="handleFileUpload('ppt', $event)" />
+        <input type="file" class="form-control" id="material" name="material" @change="handleFileUpload('ppt', $event)">
       </div>
-      <div>
+      <div class="form-group">
         <label for="material" class="form-label">课堂笔记/作业: </label>
-        <input type="file" class="form-control" id="material" name="material" @change="handleFileUpload('notes', $event)" />
+        <input type="file" class="form-control" id="material" name="material" @change="handleFileUpload('notes', $event)">
       </div>
-      <div>
+      <div class="form-group">
         <label for="material" class="form-label">测试题目/往年考试题目: </label>
-        <input type="file" class="form-control" id="material" name="material" @change="handleFileUpload('tests', $event)" />
+        <input type="file" class="form-control" id="material" name="material" @change="handleFileUpload('tests', $event)">
       </div>
-      <div>
+      <div class="form-group">
         <label for="material" class="form-label">模拟考试题目: </label>
-        <input type="file" class="form-control" id="material" name="material" @change="handleFileUpload('mockTests', $event)" />
+        <input type="file" class="form-control" id="material" name="material" @change="handleFileUpload('mockTests', $event)">
       </div>
-      <div for="material" class="form-label">
+      <div class="form-group">
         <label>其他补充材料: </label>
-        <input type="file" class="form-control" id="material" name="material" @change="handleFileUpload('others', $event)" />
+        <input type="file" class="form-control" id="material" name="material" @change="handleFileUpload('others', $event)">
       </div>
       <button type="submit" class="btn btn-primary">提交</button>
     </form>
@@ -45,7 +45,7 @@ export default {
   data() {
     return {
       files: {
-        textbook: null,
+        courseMaterials: null,
         ppt: null,
         notes: null,
         tests: null,
@@ -73,7 +73,8 @@ export default {
               const response = await axios.post('http://localhost:8010/api/submit', formData); // Store the response
               console.log("Form submitted successfully:", response.data);
               alert(`Response: ${response.data.message}`);
-              this.$router.push('/waiting');
+              //this.$router.push('/waiting');
+              this.$emit('materialUploaded'); // 触发 materialUploaded 事件
           } catch (error) {
               console.error('Error submitting form:', error);
               alert('Failed to submit. Check if there are missing files or wrong formats. Please try again.');
@@ -92,9 +93,34 @@ export default {
   color: white;
   text-align: center;
 }
-form > div {
+
+.upload-title {
+  margin-top: 40px;
   margin-bottom: 20px;
 }
+
+.upload-form {
+  width: 100%;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+
 button {
   margin-top: 20px;
   padding: 12px 30px;

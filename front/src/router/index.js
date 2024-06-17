@@ -6,6 +6,7 @@ import CreateCourse from '../components/CreateCourse.vue';
 import UploadMaterial from '../components/UploadMaterial.vue';
 import Waiting from '../components/Waiting.vue';
 import Results from '../components/Results.vue';
+import Handle from "../components/Handle.vue";
 
 const routes = [
   {
@@ -14,6 +15,11 @@ const routes = [
     components: {
       default: Welcome
     }
+  },
+  {
+    path: '/handle',
+    name: 'Handle',
+    component: Handle
   },
       {
     path: '/create-course',

@@ -72,9 +72,10 @@ export default {
         console.log(response.data);
         this.courseId = response.data.course_id; // 存储生成的课程ID
         console.log("Course id =", this.courseId)
+        this.$emit('courseCreated', this.courseId); // 触发 courseCreated 事件
 
       } catch (error) {
-        console.error("There was an error!", error);
+        console.error("There was an error creating the course", error);
       }
     },
     skipCourse() {

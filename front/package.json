@@ -7,6 +7,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "animate.css": "^4.1.1",
     "bootstrap": "^5.3.3",
     "lottie-web": "^5.12.2",
     "mdb-vue-ui-kit": "^4.1.1",
