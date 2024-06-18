@@ -2,9 +2,9 @@ import json
 import os
 import uuid
 import jwt
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from flask import Flask, request, send_from_directory, jsonify, session
+from flask import Flask, request, send_from_directory, jsonify, session, send_file
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_restful import Api, Resource, reqparse
@@ -13,26 +13,26 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
 app = Flask(__name__)
-#CORS(app)
+# CORS(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
-app.secret_key = 'supersecretkey'
+app.secret_key = 'ine0Q@i7M8#t8UrFC'
+
 # 假设你的文件和处理后的文件都将暂时存储在这个目录下
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 api = Api(app)
 
-JWT_SECRET = 'anothersecretkey'
-JWT_ALGORITHM = 'HS256'
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///local.db'  # 使用SQLite作为本地开发数据库
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'
+app.config['JWT_SECRET_KEY'] = '~r2Xgk~.2uW,mKZ=t'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=5)  # 设置 token 的有效期为 5 天
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
+
 
 # 数据库模型
 class User(db.Model):
@@ -40,8 +40,9 @@ class User(db.Model):
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
 
+
 class Course(db.Model):
-    id = db.Column(db.String(36), primary_key=True) # 使用字符串存储UUID
+    id = db.Column(db.String(36), primary_key=True)  # 使用字符串存储UUID
     courseName = db.Column(db.String(80), nullable=False)
     school = db.Column(db.String(120))
     professor = db.Column(db.String(120))
@@ -49,9 +50,11 @@ class Course(db.Model):
     info = db.Column(db.Text)
     skip = db.Column(db.Boolean, default=False)
 
+
 class UserCourse(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     course_code = db.Column(db.String(36), db.ForeignKey('course.id'), primary_key=True)
+
 
 class FileMetadata(db.Model):
     file_id = db.Column(db.String(255), primary_key=True)
@@ -59,6 +62,7 @@ class FileMetadata(db.Model):
     course_id = db.Column(db.String(36), db.ForeignKey('course.id'))
     file_path = db.Column(db.String(255))
     upload_time = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 # 注册路由
 @app.route('/api/register', methods=['POST'])
@@ -69,6 +73,7 @@ def register():
     db.session.add(new_user)
     db.session.commit()
     return jsonify(message="User registered successfully"), 201
+
 
 # 登录路由
 @app.route('/api/login', methods=['POST'])
@@ -85,13 +90,25 @@ def login():
 def generate_token():
     user_id = str(uuid.uuid4())  # 生成一个临时用户ID
     token = create_access_token(identity={'id': user_id})
-    return jsonify({'token': token}), 200
+    # print("Generate success. My JWT user id:", id)
+    return jsonify({'token': token, "user_id": user_id}), 200
+
+
+'''
+@app.route('/jwt-test', methods=['GET'])
+@jwt_required()
+def jwt_test():
+    id = get_jwt_identity()['id']
+    # print("My JWT user id:", id)
+    return {'message':"Test pass.", "My JWT user id:": id}
+'''
 
 
 # 课程注册路由
 class CreateCourseAPI(Resource):
+    @jwt_required()
     def post(self):
-        #user_id = get_jwt_identity()['id']
+        user_id = get_jwt_identity()['id']
         parser = reqparse.RequestParser()
         parser.add_argument('courseName', type=str, required=True, help='Course Name is required')
         parser.add_argument('school', type=str)
@@ -124,6 +141,7 @@ class CreateCourseAPI(Resource):
 
         return {"message": "Course created successfully", "course_id": course_id}, 201
 
+
 class Hello(Resource):
     @staticmethod
     def get():
@@ -137,6 +155,7 @@ class Hello(Resource):
     @staticmethod
     def post():
         return "[post] hello flask"
+
 
 class Default(Resource):
     @staticmethod
@@ -154,34 +173,52 @@ class Default(Resource):
 
 
 class SubmitAPI(Resource):
-    #@jwt_required()
+    @jwt_required()
     def post(self):
-        #user_id = get_jwt_identity()['id']
-        course_id = request.form.get('course_id')
+        global processed_files
+        user_id = get_jwt_identity()['id']
+
         # 检查是否有文件上传
         if not request.files:
             return {'message': 'No file part'}, 400
-        # 获取所有可能的文件
+        # user_id = uuid.uuid4()
+        course_id = request.form.get('course_id')
+
+        # 获取所有可能的文件，并确保它们是文件列表
         files = {
-            'textbook': request.files.get('textbook'),
-            'ppt': request.files.get('ppt'),
-            'notes': request.files.get('notes'),
-            'tests': request.files.get('tests'),
-            'mockTests': request.files.get('mockTests'),
-            'others': request.files.get('others')
+            'textbook': request.files.getlist('textbook'),
+            'homework': request.files.getlist('homework'),
+            'mockTests': request.files.getlist('mockTests'),
+            'others': request.files.getlist('others')
         }
 
         # 检查至少有一个文件被上传
         if not any(files.values()):
             return {'message': 'No file uploaded'}, 400
 
+        # Make a new directory by user id.
+        self.userPath = os.path.join(app.config['UPLOAD_FOLDER'], str(user_id))
+        os.makedirs(self.userPath, exist_ok=True)
+
+        # Make a new directory by course id.
+        coursePath = os.path.join(self.userPath, course_id)
+        os.makedirs(coursePath, exist_ok=True)
+
+        # 创建所有可能的类别目录
+        categories = set(files.keys())
+        for category in categories:
+            os.makedirs(os.path.join(coursePath, category), exist_ok=True)
+
         # 保存所有文件
-        for key, file in files.items():
-            # print(key)
-            if file:
-                filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-                file.save(filename)
-                print(f"Saved file: {filename}")
+        saved_files = []
+        for key in files:
+            for file in files[key]:
+                if file:
+                    filename = os.path.join(coursePath, key, file.filename)
+                    file.save(filename)
+                    print(f"Saved file: {filename}")
+                    saved_files.append(filename)
+            processed_files = self.process_files(coursePath, saved_files)
 
             '''
             filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
@@ -194,16 +231,50 @@ class SubmitAPI(Resource):
 
         # 模拟生成预测结果
         predictions = "这是预测结果"
-        return {'message': 'Files received', 'predictions': predictions}, 200
+        return {'message': 'Files received', 'courseID':course_id, "Processed files:": processed_files}, 200
 
-api.add_resource(Default, '/')
-api.add_resource(Hello, '/hello')
+    def process_files(self, csPath, files):
+        processed_files = []
+        maxFiles = 6
+        # Make dictionary
+        os.makedirs(os.path.join(csPath, "to_download"), exist_ok=True)
+
+        for file in files:
+            if maxFiles > 0:
+                # 模拟处理文件，例如复制到 processed 文件夹
+                processed_filename = os.path.join(csPath, "to_download", os.path.basename(file))
+                with open(file, 'rb') as f_src, open(processed_filename, 'wb') as f_dst:
+                    f_dst.write(f_src.read())
+                processed_files.append(processed_filename)
+                maxFiles -= 1
+        return processed_files
+
+
+class ProcessedFilesAPI(Resource):
+    @jwt_required()
+    def get(self):
+        user_id = get_jwt_identity()['id']
+        course_id = request.args.get('course_id')
+        user_path = os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), str(course_id), "to_download")
+        processed_files = [os.path.join(user_path, file) for file in os.listdir(user_path)]
+        return jsonify({'processed_files': processed_files})
+
+# 提供下载文件的接口
+@app.route('/download/<path:filename>', methods=['GET'])
+@jwt_required()
+def download_file(filename):
+    if os.path.exists(filename):
+        return send_file(filename, as_attachment=True)
+    else:
+        return jsonify({"error": "File not found"}), 404
+
+# api.add_resource(Default, '/')
+# api.add_resource(Hello, '/hello')
 api.add_resource(CreateCourseAPI, '/api/register-course')
 api.add_resource(SubmitAPI, '/api/submit')
+api.add_resource(ProcessedFilesAPI, '/api/processed-files')
 
 if __name__ == "__main__":
-    if not os.path.exists(app.config['UPLOAD_FOLDER']):
-        os.makedirs(app.config['UPLOAD_FOLDER'])
-    #db.drop_all()
+    db.drop_all()  # 重启服务时清空数据库，真正使用时谨慎处理。
     db.create_all()
     app.run(host='127.0.0.1', port=8010, debug=True)

@@ -12,20 +12,28 @@ const app = createApp(App);
 
 axios.defaults.baseURL = 'http://localhost:8010'
 
-
 const token = localStorage.getItem('token');
-if (!token) {
-  axios.get('/generate-token').then(response => {
-    const newToken = response.data.token;
-    localStorage.setItem('token', newToken);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-    app.use(router);
-    app.use(VueAxios, axios);
-    app.mount('#app');
-  });
-} else {
+
+// 初始化 Vue 应用
+const initializeApp = (token) => {
   axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   app.use(router);
   app.use(VueAxios, axios);
   app.mount('#app');
+};
+
+
+if (!token) {
+  axios.get('http://localhost:8010/generate-token').then(response => {
+    const newToken = response.data.token;
+    localStorage.setItem('token', newToken);
+    initializeApp(newToken);
+    axios.get('http://localhost:8010/jwt-test');
+  })
+    .catch(error => {
+    console.error('Error generating token:', error);
+    alert('Failed to generate token. Please try again later.');
+  });
+} else {
+  initializeApp(token);
 }

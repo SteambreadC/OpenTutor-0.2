@@ -37,7 +37,7 @@ const routes = [
     component: Waiting
   },
   {
-    path: '/results',
+    path: '/results/:courseId',
     name: 'Results',
     component: Results
   },

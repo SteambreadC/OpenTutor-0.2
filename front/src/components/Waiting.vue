@@ -1,45 +1,54 @@
 <template>
   <div class="waiting">
+    <img alt="logo of Redpanda" src="../assets/winterRedpanda.jpg" class="logo" />
     <h1>生成预测中...</h1>
-    <img src="../assets/icons8-loading2.gif" alt="Loading..." />
+    <img src="../assets/icons8-loading2.gif" alt="Loading..." class="loading" />
 
   </div>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: 'Waiting',
-  data() {
-    return {
-      resultReady: false,
-      timer: null,
-    };
+
+  props: {
+    courseId: {
+      type: String,
+      required: true
+    }
   },
-  mounted() {
-    this.checkResult();
+
+  created() {
+    // 检查处理结果，处理完成后跳转到结果页面
+    this.checkProcessedFiles();
   },
   methods: {
-      checkResult() {
-        this.timer = setInterval(async () => {
-          // 在这里调用后端 API 来检查结果是否准备好
-          // 如果结果准备好了,将 `this.resultReady` 设为 `true`
-          // 例如:
-          // const response = await axios.get('/api/check-result');
-          // this.resultReady = response.data.ready;
-        }, 1000); // 每秒检查一次
-      },
-    },
-  watch: {
-      resultReady(newValue) {
-        if (newValue) {
-          clearInterval(this.timer);
-          this.$router.push('/results');
+    checkProcessedFiles() {
+      const token = localStorage.getItem('token');
+      //const courseId = this.courseId
+
+      axios.get(`http://localhost:8010/api/processed-files?course_id=${this.courseId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      },
-    },
-    beforeUnmount() {
-      clearInterval(this.timer);
-    },
+      })
+      .then(response => {
+        if (response.data.processed_files.length > 0) {
+          setTimeout(()=>{
+              this.$router.push({ name: 'Results', params: { courseId:this.courseId }});
+          },2000);
+        } else {
+          setTimeout(this.checkProcessedFiles, 5000); // 5秒后再检查一次
+        }
+      })
+      .catch(error => {
+        console.error('Error checking processed files:', error);
+        setTimeout(this.checkProcessedFiles, 5000); // 5秒后再检查一次
+      });
+    }
+  }
 };
 </script>
 
@@ -48,7 +57,7 @@ export default {
   text-align: center;
   margin-top: 50px;
 }
-img {
+.loading {
   margin-top: 20px;
   width: 100px;
 }

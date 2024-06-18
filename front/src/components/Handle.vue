@@ -1,13 +1,13 @@
 <template>
     <div class = "switcher">
       <transition appear mode="out-in" name="switching"
-        leave-active-class="animate__animated animate__zoomOut"
+        leave-active-class="animate__animated animate__fadeOut"
         enter-active-class="animate__animated animate__fadeIn"
 
       >
           <CreateCourse v-if="currentStep === 'create-course'" @courseCreated="handleCourseCreated" />
           <UploadMaterial v-else-if="currentStep === 'upload-material'" :courseId="courseId" @materialUploaded="handleMaterialUploaded" />
-          <Waiting v-else-if="currentStep === 'waiting'" />
+          <Waiting v-else-if="currentStep === 'waiting'" :courseId="courseId" />
       </transition>
     </div>
 
@@ -46,5 +46,8 @@ export default {
 <style scoped>
 .switcher{
     overflow: hidden;
+}
+.animate__animated.animate__fadeOut{
+    --animate-duration: 0.5s;
 }
 </style>

@@ -12,11 +12,16 @@
             <router-link class="nav-link" to="/">Home</router-link>
           </li>
           <li class="nav-item">
+            <router-link class="nav-link" to="/handle">Start</router-link>
+          </li>
+          <!--
+          <li class="nav-item">
             <router-link class="nav-link" to="/create-course">Courses</router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link" to="/upload-material">Upload</router-link>
           </li>
+          -->
           <li class="nav-item">
             <router-link class="nav-link" to="/Results">Results</router-link>
           </li>
@@ -27,8 +32,7 @@
     </nav>
 
     <div class="content">
-    <img alt="logo of Redpanda" src="./assets/winterRedpanda.jpg" class="logo" />
-    <!-- TAtest1 msg="TA test here:" / -->
+
     <router-view class="view main-content"></router-view>
     </div>
     <footer class="footer">

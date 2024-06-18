@@ -1,5 +1,6 @@
 <template>
   <div class="welcome">
+    <img alt="logo of Redpanda" src="../assets/winterRedpanda.jpg" class="logo" />
     <h1>欢迎使用AI个人学习助手</h1>
     <p>这个应用可以帮助你预测考试题目，生成模拟试卷，以及提供学习辅导。</p>
     <button type="submit" class="btn btn-primary" @click="start">开始</button>
@@ -18,6 +19,10 @@ export default {
 </script>
 
 <style scoped>
+.logo{
+  margin-bottom: 25px;
+}
+
 .welcome {
   text-align: center;
   margin-top: 50px;

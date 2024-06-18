@@ -1,6 +1,7 @@
 <template>
   <transition name="fade" mode="out-in">
     <div v-if="!courseId" class="upload-page">
+      <img alt="logo of Redpanda" src="../assets/winterRedpanda.jpg" class="logo" />
       <h1 class="upload-title">创建课程</h1>
       <form @submit.prevent="submitCourse" class="upload-form">
         <div class="form-group">
@@ -80,6 +81,7 @@ export default {
     },
     skipCourse() {
       this.courseData.skip = true;
+      this.courseData.courseName = "Skipped";
       this.submitCourse();
     }
   }
@@ -102,11 +104,12 @@ export default {
 }
 
 .upload-form {
-  width: 100%;
-  max-width: 600px;
+  width: 700px;
+  max-width: 100%;
+  max-height: 100%;
   background: rgba(255, 255, 255, 0.1);
-  padding: 20px;
-  border-radius: 10px;
+  padding: 50px;
+  border-radius: 30px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -140,7 +143,7 @@ export default {
 .submit-button, .skip-button {
   width: 45%;
   padding: 10px;
-  background: #2b61c4;
+  background: #3b71ce;
   color: #ffffff;
   border: none;
   border-radius: 5px;
