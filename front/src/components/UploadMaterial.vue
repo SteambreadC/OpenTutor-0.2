@@ -72,9 +72,9 @@ export default {
       console.log("Submitting form with data:", formData);
 
       try {
-        const response = await axios.post('http://localhost:8010/api/submit', formData);
+        const response = await axios.post('/api/submit', formData);
         console.log("Form submitted successfully:", response.data);
-        alert(`Response: ${response.data.message}`);
+        //alert(`Response: ${response.data.message}`);
         this.$emit('materialUploaded');
       } catch (error) {
         console.error('Error submitting form:', error);

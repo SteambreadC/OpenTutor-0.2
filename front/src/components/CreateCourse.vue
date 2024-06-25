@@ -65,18 +65,18 @@ export default {
         }
       }
       try {
-        const response = await axios.post('/api/register-course', formData, {
+        const response = await axios.post('/api/register-course', this.courseData, {
           headers: {
-            'Content-Type': 'multipart/form-data'
+            'Content-Type': 'application/json'
           }
         });
         console.log(response.data);
         this.courseId = response.data.course_id; // 存储生成的课程ID
-        console.log("Course id =", this.courseId)
+        //console.log("Course id =", this.courseId)
         this.$emit('courseCreated', this.courseId); // 触发 courseCreated 事件
-
       } catch (error) {
         console.error("There was an error creating the course", error);
+        alert("There was an error creating the course. Please make sure to input course name or skip.")
       }
     },
     skipCourse() {
