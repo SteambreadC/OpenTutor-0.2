@@ -133,7 +133,7 @@ class CreateCourseAPI(Resource):
         db.session.commit()
 
         user_course = UserCourse(
-            user_id=1,
+            user_id=user_id,
             course_code=course_id
         )
         db.session.add(user_course)
@@ -267,6 +267,10 @@ def download_file(filename):
         return send_file(filename, as_attachment=True)
     else:
         return jsonify({"error": "File not found"}), 404
+
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify(message="Welcome to the API"), 200
 
 # api.add_resource(Default, '/')
 # api.add_resource(Hello, '/hello')
