@@ -175,7 +175,6 @@ class Default(Resource):
 class SubmitAPI(Resource):
     @jwt_required()
     def post(self):
-        global processed_files
         user_id = get_jwt_identity()['id']
 
         # 检查是否有文件上传
@@ -219,6 +218,7 @@ class SubmitAPI(Resource):
                     print(f"Saved file: {filename}")
                     saved_files.append(filename)
             processed_files = self.process_files(coursePath, saved_files)
+            print("yoyo here is the processed files:", processed_files)
 
             '''
             filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
@@ -233,21 +233,7 @@ class SubmitAPI(Resource):
         predictions = "这是预测结果"
         return {'message': 'Files received', 'courseID':course_id, "Processed files:": processed_files}, 200
 
-    def process_files(self, csPath, files):
-        processed_files = []
-        maxFiles = 6
-        # Make dictionary
-        os.makedirs(os.path.join(csPath, "to_download"), exist_ok=True)
 
-        for file in files:
-            if maxFiles > 0:
-                # 模拟处理文件，例如复制到 processed 文件夹
-                processed_filename = os.path.join(csPath, "to_download", os.path.basename(file))
-                with open(file, 'rb') as f_src, open(processed_filename, 'wb') as f_dst:
-                    f_dst.write(f_src.read())
-                processed_files.append(processed_filename)
-                maxFiles -= 1
-        return processed_files
 
 
 class ProcessedFilesAPI(Resource):

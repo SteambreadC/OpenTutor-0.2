@@ -11,7 +11,6 @@
 ## 项目结构
 
 ```
-.
 ├── front # 前端
 │    ├── package.json # 前端依赖
 │    ├── package-lock.json
@@ -19,11 +18,17 @@
 │    ├── src
 │    │    ├── App.vue # 主页面
 │    │    ├── components # 子组件
+│    │	  │		├── CreateCourse.vue
+│    │	  │		├── Results.vue
+│    │	  │		├── UploadMaterial.vue
+│    │	  │		├── Waiting.vue
+│    │	  │		├── Welcome.vue
+│    │	  │		├── Handle.vue # 链接3个主要功能
 │    │    ├── assets # 静态资源
 │    │    └── main.js
 │    └── vite.config.js
-├── back # 后端
-│    ├── app.py
+├── fastAPI # 后端
+│    ├── main.py
 │    └── requirements.txt # 后端依赖
 ├── README.md
 ├── LICENSE
@@ -34,6 +39,15 @@
 
 
 ## 参考
+
+celery 不支持 windows 
+
+请在测试/开发环境中使用 Gevent (Windows)，或将线程数限制为1.
+```angular2html
+pip install gevent
+
+celery -A celery_worker worker -l info -P gevent
+```
 
 - [Vite 官方中文文档](https://cn.vitejs.dev/guide/why.html)
 - [Flask 官方文档](https://flask.palletsprojects.com/en/1.1.x/)

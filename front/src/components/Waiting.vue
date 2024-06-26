@@ -9,6 +9,7 @@
 
 <script>
 import axios from "axios";
+import {mapActions} from "vuex";
 
 export default {
   name: 'Waiting',
@@ -20,11 +21,61 @@ export default {
     }
   },
 
+  data() {
+    return {
+      processedFiles: []
+    };
+  },
+
   created() {
-    // 检查处理结果，处理完成后跳转到结果页面
     this.checkProcessedFiles();
   },
-  methods: {
+
+methods: {
+    ...mapActions(['updateResultFiles']),
+
+    async checkProcessedFiles() {
+        try {
+            const response = await axios.get(`/api/processed-files?course_id=${this.courseId}`);
+            if (response.data.status === "processing") {
+                await this.pollTaskStatus(response.data.task_id);
+            } else {
+                this.handleProcessedFiles(response.data.processed_files);
+            }
+        } catch (error) {
+            console.error('Error checking processed files:', error);
+            setTimeout(this.checkProcessedFiles, 5000);
+        }
+    },
+
+    async pollTaskStatus(taskId) {
+        try {
+            const response = await axios.get(`/api/task-status?task_id=${taskId}&course_id=${this.courseId}`);
+            if (response.data.status === "completed") {
+                this.handleProcessedFiles(response.data.processed_files);
+            } else if (response.data.status === "error") {
+                console.error('Error processing files:', response.data.message);
+                // 处理错误情况，可能需要显示错误消息给用户
+            } else {
+                setTimeout(() => this.pollTaskStatus(taskId), 5000);
+            }
+        } catch (error) {
+            console.error('Error polling task status:', error);
+            setTimeout(() => this.pollTaskStatus(taskId), 5000);
+        }
+    },
+
+    handleProcessedFiles(files) {
+        if (!files){
+          console.error("No processed files available.");
+          alert("No processed files available.")
+        }
+
+        this.processedFiles = files;
+        this.updateResultFiles({courseId: this.courseId, files: this.processedFiles});
+        this.$router.push({name: 'Results', params: {courseId: this.courseId}});
+    }
+    /*
     checkProcessedFiles() {
       const token = localStorage.getItem('token');
       //const courseId = this.courseId
@@ -36,9 +87,14 @@ export default {
       })
       .then(response => {
         if (response.data.processed_files.length > 0) {
+          this.processedFiles = response.data.processed_files;
+          this.$store.commit("setResultFiles",{ courseId: this.courseId, files: this.processedFiles});
           setTimeout(()=>{
-              this.$router.push({ name: 'Results', params: { courseId:this.courseId }});
-          },2000);
+              this.$router.push({
+                  name: 'Results',
+                  params:{courseId: this.courseId}
+              });
+          },0);
         } else {
           setTimeout(this.checkProcessedFiles, 5000); // 5秒后再检查一次
         }
@@ -48,6 +104,7 @@ export default {
         setTimeout(this.checkProcessedFiles, 5000); // 5秒后再检查一次
       });
     }
+    */
   }
 };
 </script>

@@ -1,8 +1,7 @@
 import json
 import os
-import signal
-import sys
 import uuid
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Union
 from urllib.parse import unquote
@@ -18,7 +17,10 @@ from sqlalchemy.orm import sessionmaker, Session
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from jose import JWTError
+
+from celery_worker import process_files_task
 import jwt
+from llmMessenger import predict
 
 # FastAPI app initialization
 app = FastAPI()
@@ -76,7 +78,7 @@ class Course(Base):
 class UserCourse(Base):
     __tablename__ = "user_courses"
     user_id = Column(String, ForeignKey("users.id"), primary_key=True)
-    #user_id = Column(Integer, primary_key=True)
+    # user_id = Column(Integer, primary_key=True)
     course_code = Column(String, ForeignKey("courses.id"), primary_key=True)
 
 
@@ -84,7 +86,7 @@ class FileMetadata(Base):
     __tablename__ = "file_metadata"
     file_id = Column(String, primary_key=True, index=True)
     user_id = Column(String, ForeignKey("users.id"))
-    #user_id = Column(Integer)
+    # user_id = Column(Integer)
     course_id = Column(String, ForeignKey("courses.id"))
     file_path = Column(String)
     upload_time = Column(DateTime, default=datetime.utcnow)
@@ -208,7 +210,7 @@ def generate_token(db: Session = Depends(get_db)):
     user_id = str(uuid.uuid4())
     print("Token generated.")
     token = create_access_token(data={"id": user_id})
-    db_user = UserInDB(id=user_id, username="test"+user_id[:6], password="123456")
+    db_user = UserInDB(id=user_id, username="test" + user_id[:6], password="123456")
     db.add(db_user)
     db.commit()
     return {"access_token": token, "token_type": "bearer"}
@@ -233,14 +235,16 @@ def login_for_token(
     return {"access_token": access_token, "token_type": "bearer"}
 '''
 
+
 @app.post("/api/register-course")
-def create_course(course: CourseCreate = Body(...), current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+def create_course(course: CourseCreate = Body(...), current_user: dict = Depends(get_current_user),
+                  db: Session = Depends(get_db)):
     course_id = str(uuid.uuid4())
     cur_user_id = current_user["id"]
     print(cur_user_id)
 
     # Check values of course.
-    if not course.skip and course.courseName=="":
+    if not course.skip and course.courseName == "":
         raise HTTPException(status_code=400, detail="Course name required.")
 
     try:
@@ -256,6 +260,31 @@ def create_course(course: CourseCreate = Body(...), current_user: dict = Depends
         raise HTTPException(status_code=400, detail=str(e))
 
     return {"message": "Course created successfully", "course_id": course_id}
+
+
+class FileStorage:
+    def __init__(self):
+        self.data = defaultdict(list)
+        self.user_id = None
+
+    def set_files(self, user_id, coursePath, saved_files):
+        self.user_id = user_id
+        self.data[user_id].append(coursePath)
+        self.data[user_id].append(saved_files)
+
+    def get_files(self, user_id):
+        if user_id != self.user_id:
+            print(user_id)
+            print(self.user_id)
+            raise ValueError("Invalid path for this user")
+        return self.data[user_id][0], self.data[user_id][1]
+
+    def clear(self, user_id):
+        self.data[user_id].clear()
+
+
+
+file_storage = FileStorage()
 
 
 @app.post("/api/submit")
@@ -296,26 +325,57 @@ async def submit(
                     buffer.write(await file.read())
                 saved_files.append(file_path)
 
-    processed_files = process_files(course_path, saved_files)
+    file_storage.set_files(user_id, course_path, saved_files)
 
-    return {"message": "Files received", "courseID": course_id, "Processed files": processed_files}
+    return {"message": "Files received", "courseID": course_id}
+
 
 
 @app.get("/api/processed-files")
-def get_processed_files(course_id: str):
-    user_path = os.path.join(UPLOAD_FOLDER, str(12345), str(course_id), "to_download")
-    download_path = os.path.join(str(12345), str(course_id), "to_download")
-    processed_files = [os.path.join(download_path, file) for file in os.listdir(user_path)]
-    return {"processed_files": processed_files}
+def get_processed_files(course_id: str, current_user: dict = Depends(get_current_user)):
+    try:
+        user_id = current_user["id"]
+        cPath, sFiles = file_storage.get_files(user_id)
+        if not cPath or not sFiles:
+            raise ValueError("Invalid file storage data")
+
+        task = process_files_task.delay(cPath, sFiles)
+        return {"status": "processing", "task_id": str(task.id)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/task-status")
+def get_task_status(task_id: str, course_id:str, current_user: dict = Depends(get_current_user)):
+    task = process_files_task.AsyncResult(task_id)
+    print("I found the task!~~~~~~~~~~~~~~~~~~~~~~")
+    if task.ready():
+        result = task.result
+        print("Its ready!~~~~~~~~~~~~~~~~~~~~~~")
+        if isinstance(result, str) and result.startswith("Error"):
+            return {"status": "error", "message": result}
+
+        user_id = current_user["id"]
+
+        user_path = os.path.join(UPLOAD_FOLDER, str(user_id), str(course_id), "to_download")
+        download_path = os.path.join(str(user_id), str(course_id), "to_download")
+
+        if os.path.exists(user_path):
+            processed_files = [os.path.join(download_path, file) for file in os.listdir(user_path)]
+            file_storage.clear(user_id)
+            return {"status": "completed", "processed_files": processed_files}
+        else:
+            return {"status": "error", "message": "to_download directory not found"}
+    else:
+        return {"status": "processing"}
 
 
 @app.get("/download/{path:path}")
 async def download_file(path: str):
-    #print(f"Requested path: {path}")
+    # print(f"Requested path: {path}")
     decoded_path = unquote(path)
-    #print(f"Decoded path: {decoded_path}")
+    # print(f"Decoded path: {decoded_path}")
     file_path = os.path.join(UPLOAD_FOLDER, decoded_path)
-
 
     # 安全检查：确保文件路径不会超出 UPLOAD_FOLDER
     if not os.path.abspath(file_path).startswith(os.path.abspath(UPLOAD_FOLDER)):
@@ -327,6 +387,7 @@ async def download_file(path: str):
         raise HTTPException(status_code=404, detail="File not found")
 
 
+# Warning! Must be disabled in real deployment.
 @app.post("/clear-database/")
 def clear_db_route(db: Session = Depends(get_db)):
     try:
@@ -334,21 +395,6 @@ def clear_db_route(db: Session = Depends(get_db)):
         return {"message": "Database cleared successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error clearing database: {str(e)}")
-
-
-def process_files(csPath, files):
-    processed_files = []
-    maxFiles = 6
-    os.makedirs(os.path.join(csPath, "to_download"), exist_ok=True)
-
-    for file in files:
-        if maxFiles > 0:
-            processed_filename = os.path.join(csPath, "to_download", os.path.basename(file))
-            with open(file, 'rb') as f_src, open(processed_filename, 'wb') as f_dst:
-                f_dst.write(f_src.read())
-            processed_files.append(processed_filename)
-            maxFiles -= 1
-    return processed_files
 
 
 def clear_database(db: Session):

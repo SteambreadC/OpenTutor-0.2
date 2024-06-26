@@ -70,7 +70,7 @@ export default {
             'Content-Type': 'application/json'
           }
         });
-        console.log(response.data);
+        //console.log(response.data);
         this.courseId = response.data.course_id; // 存储生成的课程ID
         //console.log("Course id =", this.courseId)
         this.$emit('courseCreated', this.courseId); // 触发 courseCreated 事件

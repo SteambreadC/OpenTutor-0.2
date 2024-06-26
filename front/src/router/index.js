@@ -47,14 +47,7 @@ const routes = [
     components: {
       default: HelloWorld
     }
-  },
-  {
-    path: '/ta-test',
-    name: 'TAtest1',
-    msg: 'This is a test~',
-    component: TAtest1
   }
-
 ];
 
 const router = createRouter({

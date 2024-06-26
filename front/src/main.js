@@ -5,6 +5,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 import router from './router';
+import store from './store';
 
 
 
@@ -32,6 +33,7 @@ const initializeApp = (token) => {
   axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   app.use(router);
   app.use(VueAxios, axios);
+  app.use(store);  // 确保使用 Vuex Store
   app.mount('#app');
 };
 

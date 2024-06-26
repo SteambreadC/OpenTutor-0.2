@@ -1,6 +1,6 @@
 <template>
   <div class="results">
-    <img src="../assets/2renpandas.jpg" class="results-img">
+    <img src="../assets/2renpandas.jpg" class="results-img" alt="rdp">
     <h1>预测结果</h1>
     <p>这是预测的考试题目:</p>
     <!-- 文件下载列表 -->
@@ -20,36 +20,52 @@
 
 <script>
 import axios from 'axios';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'Results',
-  data() {
-    return {
-      files: [],
-    };
-  },
-  created() {
-    const courseId = this.$route.params.courseId;
-    const token = localStorage.getItem('token');
 
-    // 获取处理后的文件数据
-    axios.get(`http://localhost:8010/api/processed-files?course_id=${courseId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(response => {
-        this.files = response.data.processed_files.map(file => ({
-          name: file.split('\\').pop(),
-          url: `http://localhost:8010/download/${file}`
-        }));
-      })
-      .catch(error => {
-        console.error('Error fetching processed files:', error);
-      });
+  data(){
+      return {
+          courseId: this.$route.params.courseId
+      };
   },
+
+  computed: {
+    ...mapGetters(['getResultFiles']),
+    files() {
+      const resultFiles = this.getResultFiles(this.courseId);
+      /*
+      if (resultFiles.length <= 0){
+          this.fetchProcessedFiles()
+      }*/
+      console.log("fetch success")
+      return resultFiles.map(file => ({
+        name: file.split('\\').pop(),
+        url: `http://localhost:8010/download/${file}`
+      }));
+    }
+  },
+
   methods: {
+     fetchProcessedFiles() {
+        const token = localStorage.getItem('token');
+        axios.get(`http://localhost:8010/api/processed-files?course_id=${this.courseId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(response => {
+          this.files = response.data.processed_files.map(file => ({
+            name: file.split('\\').pop(),
+            url: `http://localhost:8010/download/${file}`
+          }));
+        })
+        .catch(error => {
+          console.error('Error fetching processed files:', error);
+        });
+    },
+
     downloadFile(url, name) {
       const token = localStorage.getItem('token');
-
       axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob'
@@ -90,6 +106,9 @@ export default {
 }
 
 .results-img {
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: none;
   text-align: center;
   margin-top: 50px;
   margin-bottom: 50px;
