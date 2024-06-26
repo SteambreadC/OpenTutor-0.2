@@ -167,7 +167,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        print(payload)
         user_id: str = payload.get("id")
         if user_id is None:
             raise credentials_exception
@@ -208,7 +207,6 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 @app.get("/generate-token")
 def generate_token(db: Session = Depends(get_db)):
     user_id = str(uuid.uuid4())
-    print("Token generated.")
     token = create_access_token(data={"id": user_id})
     db_user = UserInDB(id=user_id, username="test" + user_id[:6], password="123456")
     db.add(db_user)
@@ -348,10 +346,8 @@ def get_processed_files(course_id: str, current_user: dict = Depends(get_current
 @app.get("/api/task-status")
 def get_task_status(task_id: str, course_id:str, current_user: dict = Depends(get_current_user)):
     task = process_files_task.AsyncResult(task_id)
-    print("I found the task!~~~~~~~~~~~~~~~~~~~~~~")
     if task.ready():
         result = task.result
-        print("Its ready!~~~~~~~~~~~~~~~~~~~~~~")
         if isinstance(result, str) and result.startswith("Error"):
             return {"status": "error", "message": result}
 
